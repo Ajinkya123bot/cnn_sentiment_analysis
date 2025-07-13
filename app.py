@@ -14,8 +14,7 @@ import json
 import urllib.request
 import streamlit as st
 
-# Load word index from URL (instead of using keras)
-@st.cache_resource
+
 def get_word_index():
     url = "https://storage.googleapis.com/tensorflow/tf-keras-datasets/imdb_word_index.json"
     response = urllib.request.urlopen(url)
@@ -38,7 +37,14 @@ def load_model():
     return ort.InferenceSession("cnn_sentiment_analysis.onnx")
 
 session = load_model()
-
+def pad_sequences(sequences, maxlen):
+    padded = np.zeros((len(sequences), maxlen), dtype=int)
+    for i, seq in enumerate(sequences):
+        if len(seq) > maxlen:
+            padded[i] = seq[-maxlen:]
+        else:
+            padded[i, -len(seq):] = seq
+    return padded
 # Preprocess input text
 def encode_text(text):
     tokens = [word_index.get(word.lower(), 2) for word in text.split()]
