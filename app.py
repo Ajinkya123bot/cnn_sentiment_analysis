@@ -10,6 +10,20 @@ def pad_sequences(sequences, maxlen):
             padded[i, -len(seq):] = seq
     return padded
 
+import json
+import urllib.request
+import streamlit as st
+
+# Load word index from URL (instead of using keras)
+@st.cache_resource
+def get_word_index():
+    url = "https://storage.googleapis.com/tensorflow/tf-keras-datasets/imdb_word_index.json"
+    response = urllib.request.urlopen(url)
+    raw = response.read().decode()
+    word_index = json.loads(raw)
+    return word_index
+
+word_index = get_word_index()
 
 # Constants
 vocab_size = 10000
