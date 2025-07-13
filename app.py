@@ -1,0 +1,38 @@
+import streamlit as st
+import numpy as np
+import onnxruntime as ort
+from keras.preprocessing.sequence import pad_sequences
+from keras.datasets import imdb
+
+# Constants
+vocab_size = 10000
+max_len = 500
+
+# Load word index for decoding (optional)
+word_index = imdb.get_word_index()
+
+# Load ONNX model
+@st.cache_resource
+def load_model():
+    return ort.InferenceSession("cnn_sentiment_analysis.onnx")
+
+session = load_model()
+
+# Preprocess input text
+def encode_text(text):
+    tokens = [word_index.get(word.lower(), 2) for word in text.split()]
+    padded = pad_sequences([tokens], maxlen=max_len)
+    return padded.astype(np.int32)
+
+# Streamlit UI
+st.title("📚 Sentiment Analysis with CNN (ONNX)")
+input_text = st.text_area("Enter a movie review to analyze sentiment:", height=150)
+if st.button("Analyze"):
+    if input_text.strip() == "":
+        st.warning("Please enter some text.")
+    else:
+        encoded = encode_text(input_text)
+        result = session.run(None, {"input": encoded})[0]
+        prob = float(result[0][0])
+        label = "Positive 😊" if prob > 0.5 else "Negative 😞"
+        st.success(f"Prediction: {label} (Confidence: {prob:.2f})")
