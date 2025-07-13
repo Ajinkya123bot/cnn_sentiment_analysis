@@ -1,7 +1,15 @@
 import streamlit as st
 import numpy as np
 import onnxruntime as ort
-from keras.preprocessing.sequence import pad_sequences
+def pad_sequences(sequences, maxlen):
+    padded = np.zeros((len(sequences), maxlen), dtype=int)
+    for i, seq in enumerate(sequences):
+        if len(seq) > maxlen:
+            padded[i] = seq[-maxlen:]
+        else:
+            padded[i, -len(seq):] = seq
+    return padded
+
 from keras.datasets import imdb
 
 # Constants
