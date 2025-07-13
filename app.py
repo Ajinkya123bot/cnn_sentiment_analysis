@@ -10,7 +10,6 @@ def pad_sequences(sequences, maxlen):
             padded[i, -len(seq):] = seq
     return padded
 
-from keras.datasets import imdb
 
 # Constants
 vocab_size = 10000
